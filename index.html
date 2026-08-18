@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Reaction Time Final Boss ⚡</title>
+<style>
+  body {
+    margin: 0;
+    font-family: system-ui, sans-serif;
+    background: radial-gradient(circle at top, #ffb3c6, #590d22);
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+  }
+
+  h1 {
+    font-size: 2.4rem;
+    margin-bottom: 10px;
+  }
+
+  #gameBox {
+    background: #1b1b2f;
+    padding: 20px;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 500px;
+    text-align: center;
+    box-shadow: 0 0 10px rgba(255,255,255,0.2);
+  }
+
+  #screen {
+    width: 100%;
+    height: 200px;
+    border-radius: 12px;
+    background: #2b2b40;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+    margin-top: 10px;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  #retryBtn {
+    margin-top: 15px;
+    padding: 10px 20px;
+    background: #ffc2d1;
+    border: none;
+    border-radius: 999px;
+    font-weight: bold;
+    cursor: pointer;
+    color: #590d22;
+    display: none;
+  }
+
+  #result {
+    margin-top: 20px;
+    font-size: 1.2rem;
+  }
+
+  footer {
+    margin-top: 30px;
+    opacity: 0.8;
+  }
+</style>
+</head>
+<body>
+
+<h1>Reaction Time Final Boss ⚡</h1>
+<p>Click as fast as you can when the screen turns GREEN!</p>
+
+<div id="gameBox">
+  <div id="screen">Click to start</div>
+  <div id="info"></div>
+  <div id="result"></div>
+  <button id="retryBtn">Retry</button>
+</div>
+
+<footer>Made with love by Sayan 💖</footer>
+
+<script>
+const screenDiv = document.getElementById("screen");
+const infoDiv = document.getElementById("info");
+const resultDiv = document.getElementById("result");
+const retryBtn = document.getElementById("retryBtn");
+
+let waiting = false;
+let canClick = false;
+let startTime = 0;
+let round = 0;
+let times = [];
+
+const totalRounds = 5;
+const targetMs = 300; // NORMAL MODE
+
+function resetGame() {
+  waiting = false;
+  canClick = false;
+  startTime = 0;
+  round = 0;
+  times = [];
+  screenDiv.style.background = "#2b2b40";
+  screenDiv.textContent = "Click to start";
+  infoDiv.textContent = "";
+  resultDiv.textContent = "";
+  retryBtn.style.display = "none";
+}
+
+function scheduleNextRound() {
+  waiting = true;
+  canClick = false;
+  screenDiv.style.background = "#2b2b40";
+  screenDiv.textContent = "Wait for GREEN...";
+  infoDiv.textContent = `Round ${round + 1} of ${totalRounds}`;
+
+  const delay = 1000 + Math.random() * 2000;
+
+  setTimeout(() => {
+    if (!waiting) return;
+
+    waiting = false;
+    canClick = true;
+    startTime = performance.now();
+    screenDiv.style.background = "#2e7d32";
+    screenDiv.textContent = "CLICK!";
+  }, delay);
+}
+
+screenDiv.addEventListener("click", () => {
+  if (round === 0 && !waiting && !canClick && times.length === 0) {
+    scheduleNextRound();
+    return;
+  }
+
+  if (waiting && !canClick) {
+    resultDiv.textContent = "Too early! ❌";
+    return;
+  }
+
+  if (canClick) {
+    const reaction = performance.now() - startTime;
+    times.push(reaction);
+    round++;
+
+    infoDiv.textContent = `Reaction: ${Math.round(reaction)} ms`;
+
+    canClick = false;
+
+    if (round < totalRounds) {
+      scheduleNextRound();
+    } else {
+      endGame();
+    }
+  }
+});
+
+function endGame() {
+  const avg = times.reduce((sum, t) => sum + t, 0) / times.length;
+  const avgMs = Math.round(avg);
+
+  if (avgMs <= targetMs) {
+    resultDiv.innerHTML = `
+      Your average reaction time: ${avgMs} ms ⚡<br><br>
+      YOU ARE THE FINAL BOSS.<br>
+      <strong>Happy 46th Birthday, Mom!</strong><br>
+      Sayan made this challenge just for you — you're unstoppable 💖<br><br>
+      <strong>Good job mama! If you want your birthday present, go look in didi's closet 🎁</strong>
+    `;
+  } else {
+    resultDiv.innerHTML = `
+      Your average reaction time: ${avgMs} ms.<br><br>
+      Try again to unlock your birthday message! ✨
+    `;
+  }
+
+  retryBtn.style.display = "block";
+}
+
+retryBtn.addEventListener("click", resetGame);
+
+resetGame();
+</script>
+
+</body>
+</html>
